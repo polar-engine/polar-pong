@@ -1,6 +1,7 @@
 #include <pong/app.h>
 #include <polar/system/asset.h>
 #include <polar/system/renderer/gl32.h>
+#include <polar/component/model.h>
 
 namespace pong {
 	app::app(polar::core::polar &engine) {
@@ -14,6 +15,14 @@ namespace pong {
 			st.dtors.emplace_back(engine->addobject(&leftPaddle));
 			st.dtors.emplace_back(engine->addobject(&rightPaddle));
 			st.dtors.emplace_back(engine->addobject(&ball));
+
+			engine->addcomponent<component::model, component::model::TrianglesType>(leftPaddle, {
+				{
+					{ 0, 0, 0 },
+					{ 1, 0, 0 },
+					{ 0, 1, 0 }
+				}
+			});
 		});
 
 		engine.run("root");
