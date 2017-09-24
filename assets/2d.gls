@@ -1,11 +1,11 @@
-@attrib vec2 a_vertex
+@attrib vec3 a_vertex
 @varying smooth vec2 v_vertex
 @out rgba8 color o_color
 
 @shader vertex
 
 void main() {
-	vec4 vertex = vec4(a_vertex, 0.0, 1.0);
+	vec4 vertex = vec4(a_vertex.xy, 0.0, 1.0);
 	gl_Position = vertex;
 }
 

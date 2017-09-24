@@ -9,10 +9,14 @@ namespace pong {
 	app::app(polar::core::polar &engine) {
 		using namespace polar;
 		engine.addstate("root", [] (core::polar *engine, core::state &st) {
+			st.transitions.emplace("forward", Transition{ Push("game") });
+
 			st.addsystem<system::asset>();
 			st.addsystem<system::event>();
 			st.addsystem<system::integrator>();
 			st.addsystem_as<system::renderer::base, system::renderer::gl32, std::vector<std::string>>({"2d"});
+
+			engine->transition = "forward";
 		});
 		engine.addstate("game", [] (core::polar *engine, core::state &st) {
 			IDType leftPaddle, rightPaddle, ball;
