@@ -29,12 +29,11 @@ namespace pong {
 			st.dtors.emplace_back(engine->addobject(&rightPaddle));
 			st.dtors.emplace_back(engine->addobject(&ball));
 
-			engine->addcomponent<component::model, component::model::TrianglesType>(leftPaddle, {
-				{
-					{ 0, 0, 0 },
-					{ 1, 0, 0 },
-					{ 0, 1, 0 }
-				}
+			engine->addcomponent<component::model>(leftPaddle, GeometryType::TriangleStrip, component::model::PointsType{
+				{ -0.95, -0.2, 0 },
+				{ -0.90, -0.2, 0 },
+				{ -0.95,  0.2, 0 },
+				{ -0.90,  0.2, 0 }
 			});
 
 			auto inputM = engine->getsystem<system::input>().lock();
