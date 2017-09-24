@@ -14,7 +14,7 @@ namespace pong {
 			st.addsystem<system::asset>();
 			st.addsystem<system::event>();
 			st.addsystem<system::integrator>();
-			st.addsystem_as<system::renderer::base, system::renderer::gl32, std::vector<std::string>>({"2d"});
+			st.addsystem_as<system::renderer::base, system::renderer::gl32>(std::vector<std::string>{"2d"});
 
 			engine->transition = "forward";
 		});
