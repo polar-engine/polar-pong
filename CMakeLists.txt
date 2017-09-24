@@ -50,9 +50,9 @@ endif()
 # assets
 add_custom_target(assets ALL
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/assets
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${POLAR_RESOURCES_DIR}/assets
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PONG_RESOURCES_DIR}/assets
 	COMMAND $<TARGET_FILE:assetbuilder> ${CMAKE_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/assets ${POLAR_RESOURCES_DIR}/assets
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/assets ${PONG_RESOURCES_DIR}/assets
 )
 add_dependencies(assets pong)
 add_dependencies(assets assetbuilder)
