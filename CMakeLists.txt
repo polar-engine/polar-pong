@@ -20,9 +20,11 @@ set_property(TARGET pong PROPERTY CXX_STANDARD_REQUIRED ON)
 add_dependencies(pong polar)
 
 # copy dynamic libraries
-add_custom_command(TARGET pong POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy ${POLAR_DYLIBS} $<TARGET_FILE_DIR:pong>
-)
+if(POLAR_DYLIBS)
+	add_custom_command(TARGET pong POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy ${POLAR_DYLIBS} $<TARGET_FILE_DIR:pong>
+	)
+endif()
 
 # copy macOS frameworks
 # TODO: somehow generalize this in polar CMake infrastructure
