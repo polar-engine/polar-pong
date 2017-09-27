@@ -1,17 +1,16 @@
-@attrib vec3 a_vertex
-@varying smooth vec2 v_vertex
+@uniform Mat4 u_model
+@attrib Point3 a_vertex
 @out rgba8 color o_color
 
 @shader vertex
 
 void main() {
-	vec4 vertex = vec4(a_vertex.xy, 0.0, 1.0);
+	vec4 vertex = u_model * vec4(a_vertex.xy, 0.0, 1.0);
 	gl_Position = vertex;
 }
 
 @shader fragment
 
 void main() {
-	vec3 color = vec3(1.0, 0.0, 0.0);
-	o_color = vec4(color, 1.0);
+	o_color = vec4(1.0, 0.0, 0.0, 1.0);
 }
