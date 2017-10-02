@@ -28,9 +28,9 @@ namespace pong {
 		});
 		engine.addstate("game", [] (core::polar *engine, core::state &st) {
 			IDType leftPaddle, rightPaddle, ball;
-			st.dtors.emplace_back(engine->addobject(&leftPaddle));
-			st.dtors.emplace_back(engine->addobject(&rightPaddle));
-			st.dtors.emplace_back(engine->addobject(&ball));
+			st.dtors.emplace_back(engine->add_object(&leftPaddle));
+			st.dtors.emplace_back(engine->add_object(&rightPaddle));
+			st.dtors.emplace_back(engine->add_object(&ball));
 
 			auto model = std::make_shared<component::model>(GeometryType::TriangleStrip, component::model::PointsType{
 				{ -1, -1, 0 },
@@ -39,24 +39,24 @@ namespace pong {
 				{  1,  1, 0 }
 			});
 
-			engine->insertcomponent(leftPaddle, model);
-			engine->addcomponent<component::position>(leftPaddle, Point3(-0.925, 0, 0));
-			engine->addcomponent<component::scale>(leftPaddle, Point3(0.025, 0.2, 0));
+			engine->insert_component(leftPaddle, model);
+			engine->add_component<component::position>(leftPaddle, Point3(-0.925, 0, 0));
+			engine->add_component<component::scale>(leftPaddle, Point3(0.025, 0.2, 0));
 
-			engine->insertcomponent(rightPaddle, model);
-			engine->addcomponent<component::position>(rightPaddle, Point3(0.925, 0, 0));
-			engine->addcomponent<component::scale>(rightPaddle, Point3(0.025, 0.2, 0));
+			engine->insert_component(rightPaddle, model);
+			engine->add_component<component::position>(rightPaddle, Point3(0.925, 0, 0));
+			engine->add_component<component::scale>(rightPaddle, Point3(0.025, 0.2, 0));
 
-			engine->insertcomponent(ball, model);
-			engine->addcomponent<component::position>(ball);
-			engine->addcomponent<component::scale>(ball, Point3(0.02, 0.02, 0));
+			engine->insert_component(ball, model);
+			engine->add_component<component::position>(ball);
+			engine->add_component<component::scale>(ball, Point3(0.02, 0.02, 0));
 
-			engine->getcomponent<component::position>(ball)->pos.derivative() = Point3(-0.5, -0.1, 0);
+			engine->get_component<component::position>(ball)->pos.derivative() = Point3(-0.5, -0.1, 0);
 
-			//engine->addcomponent<component::bounds>(leftPaddle,
+			//engine->add_component<component::bounds>(leftPaddle,
 			//                                        Point3(-0.925, 0, 0),
 
-			auto inputM = engine->getsystem<system::input>().lock();
+			auto inputM = engine->get_system<system::input>().lock();
 			st.dtors.emplace_back(inputM->on(key_t::Escape, [engine] (key_t) { engine->quit(); }));
 		});
 
