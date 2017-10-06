@@ -39,22 +39,26 @@ namespace pong {
 				{  1,  1, 0 }
 			});
 
-			engine->insert_component(leftPaddle, model);
+			engine->insert_component(leftPaddle,  model);
 			engine->insert_component(rightPaddle, model);
-			engine->insert_component(ball, model);
+			engine->insert_component(ball,        model);
 
-			engine->add_component<component::position>(leftPaddle, Point3(-0.925, 0, 0));
-			engine->add_component<component::position>(rightPaddle, Point3(0.925, 0, 0));
+			engine->add_component<component::position>(leftPaddle,  Point3(-0.925, 0, 0));
+			engine->add_component<component::position>(rightPaddle, Point3( 0.925, 0, 0));
 			engine->add_component<component::position>(ball);
 
-			engine->add_component<component::scale>(leftPaddle, Point3(0.025, 0.2, 0));
-			engine->add_component<component::scale>(rightPaddle, Point3(0.025, 0.2, 0));
-			engine->add_component<component::scale>(ball, Point3(0.02, 0.02, 0));
+			engine->add_component<component::scale>(leftPaddle,  Point3(0.025, 0.2,  0));
+			engine->add_component<component::scale>(rightPaddle, Point3(0.025, 0.2,  0));
+			engine->add_component<component::scale>(ball,        Point3(0.02,  0.02, 0));
+
+			engine->add_component<component::bounds>(leftPaddle,  Point3(-1, -1, 0),
+			                                                      Point3( 2,  2, 0));
+			engine->add_component<component::bounds>(rightPaddle, Point3(-1, -1, 0),
+			                                                      Point3( 2,  2, 0));
+			engine->add_component<component::bounds>(ball,        Point3(-1, -1, 0),
+			                                                      Point3( 2,  2, 0));
 
 			engine->get_component<component::position>(ball)->pos.derivative() = Point3(-0.5, -0.1, 0);
-
-			//engine->add_component<component::bounds>(leftPaddle,
-			//                                        Point3(-0.925, 0, 0),
 
 			auto inputM = engine->get_system<system::input>().lock();
 			st.dtors.emplace_back(inputM->on(key_t::Escape, [engine] (key_t) { engine->quit(); }));
