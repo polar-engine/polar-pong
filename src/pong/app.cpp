@@ -63,30 +63,31 @@ namespace pong {
 			auto inputM = engine->get_system<system::input>().lock();
 			st.dtors.emplace_back(inputM->on(key_t::Escape, [engine] (key_t) { engine->quit(); }));
 
-			auto onKey = [engine, leftPaddle] (key_t k) {
+			const Decimal speed = 1.5;
+
+			auto onKey = [engine, speed, leftPaddle] (key_t k) {
 				auto paddle = engine->get_component<component::position>(leftPaddle);
-				const Decimal speed = 1.5;
 				auto &y = paddle->pos.derivative()->y;
 				switch(k) {
 					case key_t::Up:
-						y = speed;
+						y += speed;
 						break;
 					case key_t::Down:
-						y = -speed;
+						y -= speed;
 						break;
 					default:
 						break;
 				}
 			};
-			auto afterKey = [engine, leftPaddle] (key_t k) {
+			auto afterKey = [engine, speed, leftPaddle] (key_t k) {
 				auto paddle = engine->get_component<component::position>(leftPaddle);
 				auto &y = paddle->pos.derivative()->y;
 				switch(k) {
 					case key_t::Up:
-						if(y > 0) { y = 0; }
+						y -= speed;
 						break;
 					case key_t::Down:
-						if(y < 0) { y = 0; }
+						y += speed;
 						break;
 					default:
 						break;
