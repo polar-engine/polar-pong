@@ -3,8 +3,8 @@
 #include <polar/core/polar.h>
 
 namespace pong {
-	class app {
-	public:
-		app(polar::core::polar &);
-	};
+class app {
+  public:
+	app(polar::core::polar &);
+};
 }
