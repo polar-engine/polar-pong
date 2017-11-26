@@ -4,7 +4,6 @@
 #include <polar/component/position.h>
 #include <polar/component/scale.h>
 #include <polar/support/input/key.h>
-#include <polar/support/phys/collider/static.h>
 #include <polar/support/phys/detector/box.h>
 #include <polar/support/phys/responder/rigid.h>
 #include <polar/support/phys/responder/stat.h>
@@ -12,6 +11,7 @@
 #include <polar/system/event.h>
 #include <polar/system/input.h>
 #include <polar/system/integrator.h>
+#include <polar/system/phys.h>
 #include <polar/system/renderer/gl32.h>
 #include <pong/app.h>
 
@@ -28,8 +28,15 @@ app::app(polar::core::polar &engine) {
 		st.add<system::event>();
 		st.add<system::input>();
 		st.add<system::integrator>();
+		st.add<system::phys>();
 		st.add_as<system::renderer::base, system::renderer::gl32>(
 		    std::vector<std::string>{"2d"});
+
+		auto phys = engine->get<system::phys>().lock();
+		phys->add<detector::box, detector::box>([](auto a, auto b) {
+			debugmanager()->info("it works");
+			return true;
+		});
 
 		engine->transition = "forward";
 	});

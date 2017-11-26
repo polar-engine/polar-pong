@@ -15,7 +15,7 @@ set(PONG_SRCS
 add_executable(pong WIN32 MACOSX_BUNDLE ${PONG_SRCS})
 target_include_directories(pong PRIVATE include polar/include ${POLAR_INCLUDE_DIRS})
 target_link_libraries(pong ${POLAR_LIBS} $<TARGET_FILE:polar>)
-set_property(TARGET pong PROPERTY CXX_STANDARD 11)
+set_property(TARGET pong PROPERTY CXX_STANDARD 17)
 set_property(TARGET pong PROPERTY CXX_STANDARD_REQUIRED ON)
 add_dependencies(pong polar)
 
