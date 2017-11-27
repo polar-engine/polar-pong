@@ -48,7 +48,7 @@ app::app(polar::core::polar &engine) {
 
 		auto model = std::make_shared<component::model>(
 		    GeometryType::TriangleStrip,
-		    component::model::PointsType{
+		    component::model::point_vec{
 		        {-1, -1, 0}, {1, -1, 0}, {-1, 1, 0}, {1, 1, 0}});
 
 		engine->insert(leftPaddle, model);

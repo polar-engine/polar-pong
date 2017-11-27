@@ -11,10 +11,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine,
 #else
 int main(int argc, char **argv) {
 #endif
-	std::vector<std::string> args;
-	for(int i = 0; i < argc; ++i) { args.emplace_back(argv[i]); }
-
-	polar::core::polar engine(args);
-	auto app = pong::app(engine);
+	auto engine = polar::core::polar({argv, argv + argc});
+	pong::app{engine};
 	return 0;
 }
