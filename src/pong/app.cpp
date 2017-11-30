@@ -32,36 +32,6 @@ namespace pong {
 			st.add_as<system::renderer::base, system::renderer::gl32>(
 			    std::vector<std::string>{"2d"});
 
-			auto phys = engine->get<system::phys>().lock();
-			phys->add<detector::box, detector::box>(
-			    [](core::polar *engine, auto a, auto b) {
-				    Point3 originA, originB;
-				    if(auto p = engine->get<component::position>(a.id)) {
-					    originA += p->pos.get();
-				    }
-				    if(auto p = engine->get<component::position>(b.id)) {
-					    originB += p->pos.get();
-				    }
-
-				    Point3 scaleA = a.detector->size;
-				    Point3 scaleB = b.detector->size;
-				    if(auto s = engine->get<component::scale>(a.id)) {
-					    scaleA *= s->sc.get();
-				    }
-				    if(auto s = engine->get<component::scale>(b.id)) {
-					    scaleB *= s->sc.get();
-				    }
-
-				    auto minA = originA - scaleA;
-				    auto maxA = originA + scaleA;
-				    auto minB = originB - scaleB;
-				    auto maxB = originB + scaleB;
-
-				    return minA.x <= maxB.x && maxA.x >= minB.x &&
-				           minA.y <= maxB.y && maxA.y >= minB.y &&
-				           minA.z <= maxB.z && maxA.z >= minB.z;
-			    });
-
 			engine->transition = "forward";
 		});
 		engine.addstate("game", [](core::polar *engine, core::state &st) {
