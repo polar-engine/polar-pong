@@ -1,4 +1,3 @@
-#include <polar/component/bounds.h>
 #include <polar/component/model.h>
 #include <polar/component/phys.h>
 #include <polar/component/position.h>
@@ -56,13 +55,6 @@ namespace pong {
 			engine->add<component::scale>(leftPaddle, Point3(0.025, 0.2, 0));
 			engine->add<component::scale>(rightPaddle, Point3(0.025, 0.2, 0));
 			engine->add<component::scale>(ball, Point3(0.02, 0.02, 0));
-
-			engine->add<component::bounds>(leftPaddle, Point3(-1, -1, 0),
-			                               Point3(2, 2, 0));
-			engine->add<component::bounds>(rightPaddle, Point3(-1, -1, 0),
-			                               Point3(2, 2, 0));
-			engine->add<component::bounds>(ball, Point3(-1, -1, 0),
-			                               Point3(2, 2, 0));
 
 			auto phys = std::make_shared<component::phys>(detector::box(),
 			                                              responder::stat());
