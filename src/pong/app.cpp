@@ -20,7 +20,7 @@ namespace pong {
 		using namespace support::phys;
 		using key_t = support::input::key;
 
-		engine.addstate("root", [](core::polar *engine, core::state &st) {
+		engine.add("root", [](core::polar *engine, core::state &st) {
 			st.transitions.emplace("forward", Transition{Push("game")});
 
 			st.add<system::asset>();
@@ -33,7 +33,7 @@ namespace pong {
 
 			engine->transition = "forward";
 		});
-		engine.addstate("game", [](core::polar *engine, core::state &st) {
+		engine.add("game", [](core::polar *engine, core::state &st) {
 			IDType leftPaddle, rightPaddle, ball;
 			st.dtors.emplace_back(engine->add(&leftPaddle));
 			st.dtors.emplace_back(engine->add(&rightPaddle));
