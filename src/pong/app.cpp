@@ -67,8 +67,8 @@ namespace pong {
 			auto phys = std::make_shared<component::phys>(detector::box(),
 			                                              responder::stat());
 
-			engine->insert<component::phys>(leftPaddle, phys);
-			engine->insert<component::phys>(rightPaddle, phys);
+			engine->insert(leftPaddle, phys);
+			engine->insert(rightPaddle, phys);
 			engine->add<component::phys>(ball, detector::box(),
 			                             responder::rigid());
 
