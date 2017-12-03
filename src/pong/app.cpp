@@ -35,9 +35,9 @@ namespace pong {
 		});
 		engine.add("game", [](core::polar *engine, core::state &st) {
 			IDType leftPaddle, rightPaddle, ball;
-			st.dtors.emplace_back(engine->add(&leftPaddle));
-			st.dtors.emplace_back(engine->add(&rightPaddle));
-			st.dtors.emplace_back(engine->add(&ball));
+			st.dtors.emplace_back(engine->add(leftPaddle));
+			st.dtors.emplace_back(engine->add(rightPaddle));
+			st.dtors.emplace_back(engine->add(ball));
 
 			auto model = std::make_shared<component::model>(
 			    GeometryType::TriangleStrip,
@@ -105,6 +105,39 @@ namespace pong {
 			st.dtors.emplace_back(inputM->on(key_t::Down, onKey));
 			st.dtors.emplace_back(inputM->after(key_t::Up, afterKey));
 			st.dtors.emplace_back(inputM->after(key_t::Down, afterKey));
+
+			auto onKey2 = [engine, speed, rightPaddle](key_t k) {
+				auto paddle = engine->get<component::position>(rightPaddle);
+				auto &y     = paddle->pos.derivative()->y;
+				switch(k) {
+				case key_t::W:
+					y += speed;
+					break;
+				case key_t::S:
+					y -= speed;
+					break;
+				default:
+					break;
+				}
+			};
+			auto afterKey2 = [engine, speed, rightPaddle](key_t k) {
+				auto paddle = engine->get<component::position>(rightPaddle);
+				auto &y     = paddle->pos.derivative()->y;
+				switch(k) {
+				case key_t::W:
+					y -= speed;
+					break;
+				case key_t::S:
+					y += speed;
+					break;
+				default:
+					break;
+				}
+			};
+			st.dtors.emplace_back(inputM->on(key_t::W, onKey2));
+			st.dtors.emplace_back(inputM->on(key_t::S, onKey2));
+			st.dtors.emplace_back(inputM->after(key_t::W, afterKey2));
+			st.dtors.emplace_back(inputM->after(key_t::S, afterKey2));
 		});
 
 		engine.run("root");
