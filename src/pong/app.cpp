@@ -40,9 +40,9 @@ namespace pong {
 		});
 		engine.add("game", [](core::polar *engine, core::state &st) {
 			IDType left_paddle, right_paddle, ball;
-			st.dtors.emplace_back(engine->add(left_paddle));
-			st.dtors.emplace_back(engine->add(right_paddle));
-			st.dtors.emplace_back(engine->add(ball));
+			st.keep(engine->add(left_paddle));
+			st.keep(engine->add(right_paddle));
+			st.keep(engine->add(ball));
 
 			auto model = std::make_shared<component::model>(
 			    GeometryType::TriangleStrip,
@@ -85,25 +85,19 @@ namespace pong {
 			auto a_right_paddle = action->analog();
 			auto a_quit_game    = action->digital();
 
-			st.dtors.emplace_back(action->bind(a_left_paddle,  std::bind(on_axis_paddle, left_paddle,  std::placeholders::_1)));
-			st.dtors.emplace_back(action->bind(a_right_paddle, std::bind(on_axis_paddle, right_paddle, std::placeholders::_1)));
-			st.dtors.emplace_back(action->bind(lifetime::on, a_quit_game, [engine] { engine->quit(); }));
+			st.keep(action->bind(a_left_paddle,  std::bind(on_axis_paddle, left_paddle,  std::placeholders::_1)));
+			st.keep(action->bind(a_right_paddle, std::bind(on_axis_paddle, right_paddle, std::placeholders::_1)));
+			st.keep(action->bind(lifetime::on, a_quit_game, [engine] { engine->quit(); }));
 
-			st.dtors.emplace_back(action->bind(lifetime::when,  kb->action(key::W),      a_left_paddle,   1));
-			st.dtors.emplace_back(action->bind(lifetime::when,  kb->action(key::S),      a_left_paddle,  -1));
-			st.dtors.emplace_back(action->bind(lifetime::when,  kb->action(key::Up),     a_right_paddle,  1));
-			st.dtors.emplace_back(action->bind(lifetime::when,  kb->action(key::Down),   a_right_paddle, -1));
-			st.dtors.emplace_back(action->bind(lifetime::after, kb->action(key::Escape), a_quit_game));
-
-			//st.keep(action->bind(lifetime::when,  kb->action(key::W),      a_left_paddle,   1));
-			//st.keep(action->bind(lifetime::when,  kb->action(key::S),      a_left_paddle,  -1));
-			//st.keep(action->bind(lifetime::when,  kb->action(key::Up),     a_right_paddle,  1));
-			//st.keep(action->bind(lifetime::when,  kb->action(key::Down),   a_right_paddle, -1));
-			//st.keep(action->bind(lifetime::after, kb->action(key::Escape), a_quit_game));
+			st.keep(action->bind(lifetime::when,  kb->action(key::W),      a_left_paddle,   1));
+			st.keep(action->bind(lifetime::when,  kb->action(key::S),      a_left_paddle,  -1));
+			st.keep(action->bind(lifetime::when,  kb->action(key::Up),     a_right_paddle,  1));
+			st.keep(action->bind(lifetime::when,  kb->action(key::Down),   a_right_paddle, -1));
+			st.keep(action->bind(lifetime::after, kb->action(key::Escape), a_quit_game));
 
 			auto a_hello_world = action->digital();
-			st.dtors.emplace_back(action->bind(lifetime::on, a_hello_world, [] { debugmanager()->info("hello world"); }));
-			st.dtors.emplace_back(action->bind(lifetime::when, kb->action(key::H), a_hello_world));
+			st.keep(action->bind(lifetime::on, a_hello_world, [] { debugmanager()->info("hello world"); }));
+			st.keep(action->bind(lifetime::when, kb->action(key::H), a_hello_world));
 		});
 
 		engine.run("root");
