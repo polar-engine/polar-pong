@@ -9,16 +9,19 @@
 #include <polar/system/asset.h>
 #include <polar/system/event.h>
 #include <polar/system/input.h>
+#include <polar/system/action.h>
 #include <polar/system/integrator.h>
 #include <polar/system/phys.h>
 #include <polar/system/renderer/gl32.h>
+#include <polar/system/keyboard.h>
 #include <pong/app.h>
 
 namespace pong {
 	app::app(polar::core::polar &engine) {
 		using namespace polar;
 		using namespace support::phys;
-		using key_t = support::input::key;
+		using key = support::input::key;
+		using lifetime = support::action::lifetime;
 
 		engine.add("root", [](core::polar *engine, core::state &st) {
 			st.transitions.emplace("forward", Transition{Push("game")});
@@ -26,6 +29,8 @@ namespace pong {
 			st.add<system::asset>();
 			st.add<system::event>();
 			st.add<system::input>();
+			st.add<system::action>();
+			st.add<system::keyboard>();
 			st.add<system::integrator>();
 			st.add<system::phys>();
 			st.add_as<system::renderer::base, system::renderer::gl32>(
@@ -34,9 +39,9 @@ namespace pong {
 			engine->transition = "forward";
 		});
 		engine.add("game", [](core::polar *engine, core::state &st) {
-			IDType leftPaddle, rightPaddle, ball;
-			st.dtors.emplace_back(engine->add(leftPaddle));
-			st.dtors.emplace_back(engine->add(rightPaddle));
+			IDType left_paddle, right_paddle, ball;
+			st.dtors.emplace_back(engine->add(left_paddle));
+			st.dtors.emplace_back(engine->add(right_paddle));
 			st.dtors.emplace_back(engine->add(ball));
 
 			auto model = std::make_shared<component::model>(
@@ -44,100 +49,61 @@ namespace pong {
 			    component::model::point_vec{
 			        {-1, -1, 0}, {1, -1, 0}, {-1, 1, 0}, {1, 1, 0}});
 
-			engine->insert(leftPaddle, model);
-			engine->insert(rightPaddle, model);
+			engine->insert(left_paddle, model);
+			engine->insert(right_paddle, model);
 			engine->insert(ball, model);
 
-			engine->add<component::position>(leftPaddle, Point3(-0.925, 0, 0));
-			engine->add<component::position>(rightPaddle, Point3(0.925, 0, 0));
+			engine->add<component::position>(left_paddle, Point3(-0.925, 0, 0));
+			engine->add<component::position>(right_paddle, Point3(0.925, 0, 0));
 			engine->add<component::position>(ball);
 
-			engine->add<component::scale>(leftPaddle, Point3(0.025, 0.2, 0));
-			engine->add<component::scale>(rightPaddle, Point3(0.025, 0.2, 0));
+			engine->add<component::scale>(left_paddle, Point3(0.025, 0.2, 0));
+			engine->add<component::scale>(right_paddle, Point3(0.025, 0.2, 0));
 			engine->add<component::scale>(ball, Point3(0.02, 0.02, 0));
 
 			auto phys = std::make_shared<component::phys>(detector::box(),
 			                                              responder::stat());
 
-			engine->insert(leftPaddle, phys);
-			engine->insert(rightPaddle, phys);
+			engine->insert(left_paddle, phys);
+			engine->insert(right_paddle, phys);
 			engine->add<component::phys>(ball, detector::box(),
 			                             responder::rigid());
 
 			engine->get<component::position>(ball)->pos.derivative() =
 			    Point3(-0.5, -0.1, 0);
 
-			auto inputM = engine->get<system::input>().lock();
-			st.dtors.emplace_back(
-			    inputM->on(key_t::Escape, [engine](key_t) { engine->quit(); }));
+			auto action = engine->get<system::action>().lock();
+			auto kb = engine->get<system::keyboard>().lock();
 
 			const Decimal speed = 1.5;
+			auto on_axis_paddle = [engine, speed](IDType paddle, Decimal delta) {
+				auto position = engine->get<component::position>(paddle);
+				position->pos.derivative()->y = delta * speed;
+			};
 
-			auto onKey = [engine, speed, leftPaddle](key_t k) {
-				auto paddle = engine->get<component::position>(leftPaddle);
-				auto &y     = paddle->pos.derivative()->y;
-				switch(k) {
-				case key_t::Up:
-					y += speed;
-					break;
-				case key_t::Down:
-					y -= speed;
-					break;
-				default:
-					break;
-				}
-			};
-			auto afterKey = [engine, speed, leftPaddle](key_t k) {
-				auto paddle = engine->get<component::position>(leftPaddle);
-				auto &y     = paddle->pos.derivative()->y;
-				switch(k) {
-				case key_t::Up:
-					y -= speed;
-					break;
-				case key_t::Down:
-					y += speed;
-					break;
-				default:
-					break;
-				}
-			};
-			st.dtors.emplace_back(inputM->on(key_t::Up, onKey));
-			st.dtors.emplace_back(inputM->on(key_t::Down, onKey));
-			st.dtors.emplace_back(inputM->after(key_t::Up, afterKey));
-			st.dtors.emplace_back(inputM->after(key_t::Down, afterKey));
+			auto a_left_paddle  = action->analog();
+			auto a_right_paddle = action->analog();
+			auto a_quit_game    = action->digital();
 
-			auto onKey2 = [engine, speed, rightPaddle](key_t k) {
-				auto paddle = engine->get<component::position>(rightPaddle);
-				auto &y     = paddle->pos.derivative()->y;
-				switch(k) {
-				case key_t::W:
-					y += speed;
-					break;
-				case key_t::S:
-					y -= speed;
-					break;
-				default:
-					break;
-				}
-			};
-			auto afterKey2 = [engine, speed, rightPaddle](key_t k) {
-				auto paddle = engine->get<component::position>(rightPaddle);
-				auto &y     = paddle->pos.derivative()->y;
-				switch(k) {
-				case key_t::W:
-					y -= speed;
-					break;
-				case key_t::S:
-					y += speed;
-					break;
-				default:
-					break;
-				}
-			};
-			st.dtors.emplace_back(inputM->on(key_t::W, onKey2));
-			st.dtors.emplace_back(inputM->on(key_t::S, onKey2));
-			st.dtors.emplace_back(inputM->after(key_t::W, afterKey2));
-			st.dtors.emplace_back(inputM->after(key_t::S, afterKey2));
+			st.dtors.emplace_back(action->bind(a_left_paddle,  std::bind(on_axis_paddle, left_paddle,  std::placeholders::_1)));
+			st.dtors.emplace_back(action->bind(a_right_paddle, std::bind(on_axis_paddle, right_paddle, std::placeholders::_1)));
+			st.dtors.emplace_back(action->bind(lifetime::on, a_quit_game, [engine] { engine->quit(); }));
+
+			st.dtors.emplace_back(action->bind(lifetime::when,  kb->action(key::W),      a_left_paddle,   1));
+			st.dtors.emplace_back(action->bind(lifetime::when,  kb->action(key::S),      a_left_paddle,  -1));
+			st.dtors.emplace_back(action->bind(lifetime::when,  kb->action(key::Up),     a_right_paddle,  1));
+			st.dtors.emplace_back(action->bind(lifetime::when,  kb->action(key::Down),   a_right_paddle, -1));
+			st.dtors.emplace_back(action->bind(lifetime::after, kb->action(key::Escape), a_quit_game));
+
+			//st.keep(action->bind(lifetime::when,  kb->action(key::W),      a_left_paddle,   1));
+			//st.keep(action->bind(lifetime::when,  kb->action(key::S),      a_left_paddle,  -1));
+			//st.keep(action->bind(lifetime::when,  kb->action(key::Up),     a_right_paddle,  1));
+			//st.keep(action->bind(lifetime::when,  kb->action(key::Down),   a_right_paddle, -1));
+			//st.keep(action->bind(lifetime::after, kb->action(key::Escape), a_quit_game));
+
+			auto a_hello_world = action->digital();
+			st.dtors.emplace_back(action->bind(lifetime::on, a_hello_world, [] { debugmanager()->info("hello world"); }));
+			st.dtors.emplace_back(action->bind(lifetime::when, kb->action(key::H), a_hello_world));
 		});
 
 		engine.run("root");
