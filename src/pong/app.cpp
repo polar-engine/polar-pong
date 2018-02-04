@@ -7,9 +7,8 @@
 #include <polar/support/phys/responder/rigid.h>
 #include <polar/support/phys/responder/stat.h>
 #include <polar/system/asset.h>
-#include <polar/system/event.h>
-#include <polar/system/input.h>
 #include <polar/system/action.h>
+#include <polar/system/event.h>
 #include <polar/system/integrator.h>
 #include <polar/system/phys.h>
 #include <polar/system/renderer/gl32.h>
@@ -27,9 +26,8 @@ namespace pong {
 			st.transitions.emplace("forward", Transition{Push("game")});
 
 			st.add<system::asset>();
-			st.add<system::event>();
-			st.add<system::input>();
 			st.add<system::action>();
+			st.add<system::event>();
 			st.add<system::keyboard>();
 			st.add<system::integrator>();
 			st.add<system::phys>();
