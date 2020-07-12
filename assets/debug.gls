@@ -1,0 +1,18 @@
+@uniform Mat4 u_projection
+@uniform Mat4 u_view
+@uniform Mat4 u_model
+@attrib Point3 a_vertex
+@out rgba8 color o_color
+
+@shader vertex
+
+void main() {
+	vec4 modelViewVertex = u_view * u_model * vec4(a_vertex, 1.0);
+	gl_Position = u_projection * modelViewVertex;
+}
+
+@shader fragment
+
+void main() {
+	o_color = vec4(0.5, 1.0, 0.5, 0.5);
+}
