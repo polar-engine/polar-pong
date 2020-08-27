@@ -12,7 +12,6 @@
 #include <polar/support/phys/responder/stat.h>
 #include <polar/system/action.h>
 #include <polar/system/asset.h>
-#include <polar/system/event.h>
 #include <polar/system/integrator.h>
 #include <polar/system/phys.h>
 #include <polar/system/renderer/gl32.h>
@@ -32,14 +31,9 @@ namespace pong {
 			st.add<system::asset>();
 			st.add<system::sched>();
 			st.add<system::action>();
-			st.add<system::event>();
 			st.add<system::integrator>();
 			st.add<system::phys>();
-			st.add_as<system::renderer::base, system::renderer::gl32>(
-			    std::vector<std::string>{"2d"});
-
-			//st.add_as<system::renderer::base, system::renderer::gl32>();
-			//IDType shader_2d;
+			st.add_as<system::renderer::base, system::renderer::gl32>(std::vector<std::string>{"2d"});
 
 			engine->transition = "forward";
 		});
@@ -67,16 +61,13 @@ namespace pong {
 			engine->insert(right_paddle, scale);
 			engine->add<component::scale>(ball, math::point3(0.02, 0.02, 0));
 
-			auto phys = std::make_shared<component::phys>(detector::box(),
-			                                              responder::stat());
+			auto phys = std::make_shared<component::phys>(detector::box(), responder::stat());
 
 			engine->insert(left_paddle, phys);
 			engine->insert(right_paddle, phys);
-			engine->add<component::phys>(ball, detector::box(),
-			                             responder::rigid());
+			engine->add<component::phys>(ball, detector::box(), responder::rigid());
 
-			engine->get<component::position>(ball)->pos.derivative() =
-			    math::point3(-0.5, -0.1, 0);
+			engine->get<component::position>(ball)->pos.derivative() = math::point3(-0.5, -0.1, 0);
 
 			namespace kb    = support::action::keyboard;
 			namespace mouse = support::action::mouse;
