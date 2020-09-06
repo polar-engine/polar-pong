@@ -49,7 +49,6 @@ namespace pong {
 			st.add<system::opengl::texture>();
 			st.add<system::opengl::window>();
 			st.add<system::phys>();
-			st.add<system::renderer::gl32>();
 			st.add<system::sched>();
 
 			auto assetM = engine->get<system::asset>().lock();

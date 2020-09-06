@@ -13,15 +13,20 @@ void main() {
 @shader fragment
 
 void main() {
-	vec2 texCoord = v_vertex;
+	vec2 texcoord = v_vertex;
 
 	// TODO: use aspectCorrect or u_resolution for pixel-correct aberration
 	//float aspect = u_resolution.x / u_resolution.y;
 	//vec2 aspectCorrect = vec2(1.0, aspect);
 
-	float factor = 0.001;
-	o_color.r = texture(u_diffuse, texCoord + vec2(-factor,  factor * 5.0)).r;
-	o_color.g = texture(u_diffuse, texCoord + vec2( factor * 6.0,     0.0)).g;
-	o_color.b = texture(u_diffuse, texCoord + vec2(-factor, -factor * 5.0)).b;
-	o_color.a = 1.0;
+	float amount = 0.005;
+
+	vec3 color;
+	color.r = texture(u_diffuse, vec2(texcoord.x + amount, texcoord.y)).r;
+	color.g = texture(u_diffuse, texcoord).g;
+	color.b = texture(u_diffuse, vec2(texcoord.x - amount, texcoord.y)).b;
+
+	color *= (1.0 - amount * 0.5);
+
+	o_color = vec4(color, 1.0);
 }
