@@ -25,7 +25,6 @@
 #include <polar/system/opengl/texture.h>
 #include <polar/system/opengl/window.h>
 #include <polar/system/phys.h>
-#include <polar/system/renderer/gl32.h>
 #include <polar/system/sched.h>
 #include <pong/app.h>
 
@@ -77,7 +76,7 @@ namespace pong {
 
 			engine->add<component::model>(ball, box_asset, stage_main);
 			engine->add<component::material>(ball, diffuse);
-			engine->add<component::position>(ball)->pos.derivative() = math::point3(-0.5, -0.1, 0);
+			engine->add<component::position>(ball)->pos.derivative(0) = math::point3(-0.5, -0.1, 0);
 			engine->add<component::scale>(ball, math::point3(0.2, 0.2, 0));
 			engine->add<component::phys>(ball, detector::box(), responder::rigid());
 
@@ -115,7 +114,7 @@ namespace pong {
 			const math::decimal speed = 1.5;
 			auto on_axis_paddle = [engine, speed](core::ref paddle, math::decimal delta) {
 				auto position = engine->mutate<component::position>(paddle);
-				position->pos.derivative()->y = delta * speed;
+				position->pos.derivative(0)->y = delta * speed;
 			};
 
 			st.keep(action->bind<a_left_paddle >(std::bind(on_axis_paddle, left_paddle,  std::placeholders::_2)));
