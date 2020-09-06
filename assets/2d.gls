@@ -1,5 +1,9 @@
+@uniform sampler2D u_diffuse_map
 @uniform Mat4 u_model
 @attrib Point3 a_vertex
+@attrib Point3 a_normal
+@attrib Point2 a_texcoord
+@varying smooth Point2 v_texcoord
 @out rgba8 color o_color
 
 @shader vertex
@@ -7,10 +11,18 @@
 void main() {
 	vec4 vertex = u_model * vec4(a_vertex.xy, 0.0, 1.0);
 	gl_Position = vertex;
+
+	v_texcoord = a_texcoord;
 }
 
 @shader fragment
 
 void main() {
-	o_color = vec4(1.0, 0.0, 0.0, 1.0);
+	vec2 texcoord = v_texcoord;
+	texcoord.y = 1.0 - texcoord.y;
+
+	vec3 diffuse_color  = vec3(texture(u_diffuse_map,  texcoord));
+
+	//o_color = vec4(1.0, 0.5, 0.5, 1.0);
+	o_color = vec4(diffuse_color, 1.0);
 }
