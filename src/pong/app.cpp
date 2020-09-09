@@ -5,7 +5,9 @@
 #include <polar/component/phys.h>
 #include <polar/component/position.h>
 #include <polar/component/scale.h>
+#include <polar/component/scene.h>
 #include <polar/component/stage.h>
+#include <polar/math/constants.h>
 #include <polar/math/types.h>
 #include <polar/support/action/keyboard.h>
 #include <polar/support/action/mouse.h>
@@ -52,55 +54,78 @@ namespace pong {
 
 			auto assetM = engine->get<system::asset>().lock();
 			auto box_asset     = assetM->get<asset::model>("box");
-			auto diffuse_asset = assetM->get<asset::image>("diffuse1");
+			auto diffuse_asset = assetM->get<asset::image>("paddle");
 
-			core::ref win             = engine->add();
-			core::ref fb_main         = engine->add();
-			core::ref stage_main      = engine->add();
-			core::ref stage_chroma    = engine->add();
-			core::ref diffuse         = engine->add();
-			core::ref viewport_chroma = engine->add();
-			core::ref ball            = engine->add();
-			core::ref left_paddle     = engine->add();
-			core::ref right_paddle    = engine->add();
-
+			auto win = engine->add();
 			engine->add<component::window>(win, math::point2i(1280, 1280));
-			engine->add<component::framebuffer>(fb_main, win);
-			engine->add<component::stage>(stage_main, "2d", fb_main);
-			engine->add<component::stage>(stage_chroma, "chroma", win);
 
-			engine->add<component::texture>(diffuse, diffuse_asset);
+			// chromatic aberration
 
-			engine->add<component::model>(viewport_chroma, box_asset, stage_chroma);
-			engine->add<component::material>(viewport_chroma, fb_main);
+			auto fb_chroma = engine->add();
+			engine->add<component::framebuffer>(fb_chroma, win);
+			engine->add<component::color      >(fb_chroma, math::point4(0.8, 0.5, 0.3, 0));
 
-			engine->add<component::model>(ball, box_asset, stage_main);
-			engine->add<component::material>(ball, diffuse);
+			auto stage_chroma = engine->add();
+			engine->add<component::stage>(stage_chroma, "chroma");
+
+			auto scene_chroma = engine->add();
+			engine->add<component::scene>(scene_chroma);
+
+			auto mat_chroma = engine->add();
+			engine->add<component::material>(mat_chroma, stage_chroma, fb_chroma);
+
+			auto viewport_chroma = engine->add();
+			engine->add<component::model>(viewport_chroma, box_asset, scene_chroma, mat_chroma);
+			//engine->add<component::orientation>(viewport_chroma)->orient.derivative(0) = math::point3(0, math::PI_BY<2>, 0);
+
+			auto camera_chroma = engine->add();
+			auto proj = math::perspective(math::point2(1280, 1280), 0.1, 1000);
+			engine->add<component::camera     >(camera_chroma, scene_chroma, win, proj);
+			engine->add<component::position   >(camera_chroma)->pos.derivative(0) = math::point3(0, 0, 0.5f);
+
+			// main
+
+			auto stage_main = engine->add();
+			engine->add<component::stage>(stage_main, "2d");
+
+			auto scene_main = engine->add();
+			engine->add<component::scene>(scene_main);
+
+			auto tex_box = engine->add();
+			engine->add<component::texture>(tex_box, diffuse_asset);
+
+			auto mat_box = engine->add();
+			engine->add<component::material>(mat_box, stage_main, tex_box);
+
+			auto ball = engine->add();
 			engine->add<component::position>(ball)->pos.derivative(0) = math::point3(-0.5, -0.1, 0);
-			engine->add<component::scale>(ball, math::point3(0.2, 0.2, 0));
-			engine->add<component::phys>(ball, detector::box(), responder::rigid());
+			engine->add<component::scale   >(ball, math::point3(0.2, 0.2, 0));
+			engine->add<component::phys    >(ball, detector::box(), responder::rigid());
+			engine->add<component::model   >(ball, box_asset, scene_main, mat_box);
 
-			engine->add<component::model>(left_paddle, box_asset, stage_main);
+			auto left_paddle = engine->add();
 			engine->add<component::position>(left_paddle, math::point3(-0.925, 0, 0));
-			engine->add<component::scale>(left_paddle, math::point3(0.025, 0.2, 0));
-			engine->add<component::phys>(left_paddle, detector::box(), responder::stat());
+			engine->add<component::scale   >(left_paddle, math::point3(0.025, 0.2, 0));
+			engine->add<component::phys    >(left_paddle, detector::box(), responder::stat());
+			engine->add<component::model   >(left_paddle, box_asset, scene_main, mat_box);
 
-			engine->add<component::model>(right_paddle, box_asset, stage_main);
+			auto right_paddle = engine->add();
 			engine->add<component::position>(right_paddle, math::point3( 0.925, 0, 0));
-			engine->add<component::scale>(right_paddle, math::point3(0.025, 0.2, 0));
-			engine->add<component::phys>(right_paddle, detector::box(), responder::stat());
+			engine->add<component::scale   >(right_paddle, math::point3(0.025, 0.2, 0));
+			engine->add<component::phys    >(right_paddle, detector::box(), responder::stat());
+			engine->add<component::model   >(right_paddle, box_asset, scene_main, mat_box);
 
-			st.keep(win);
-			st.keep(fb_main);
-			st.keep(stage_main);
-			st.keep(stage_chroma);
-			st.keep(diffuse);
+			auto camera_main = engine->add();
+			engine->add<component::camera>(camera_main, scene_main, fb_chroma);
+
 			st.keep(viewport_chroma);
 			st.keep(ball);
 			st.keep(left_paddle);
 			st.keep(right_paddle);
+			st.keep(camera_chroma);
+			st.keep(camera_main);
 
-
+			// actions
 
 			namespace kb    = support::action::keyboard;
 			namespace mouse = support::action::mouse;
@@ -130,10 +155,6 @@ namespace pong {
 
 			st.keep(action->bind<kb::key<key::H>>(lifetime::when, [](auto) {
 				polar::log()->notice("pong", "hello world");
-			}));
-
-			st.keep(action->bind<kb::key<key::R>>(lifetime::on, [engine, win](auto) {
-				engine->mutate<component::window>(win)->size.x = 1500;
 			}));
 		});
 
