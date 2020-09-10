@@ -24,7 +24,7 @@ void main() {
 	//float aspect = u_resolution.x / u_resolution.y;
 	//vec2 aspectCorrect = vec2(1.0, aspect);
 
-	float amount = 0.005;
+	float amount = 0.002;
 
 	vec3 color;
 	color.r = texture(u_diffuse_map, vec2(texcoord.x + amount, texcoord.y)).r;
