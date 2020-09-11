@@ -53,10 +53,6 @@ namespace pong {
 			st.add<system::sched>();
 
 			auto assetM = engine->get<system::asset>().lock();
-			auto cabinet_asset = assetM->get<asset::model>("cabinet");
-			auto monitor_asset = assetM->get<asset::model>("monitor");
-			auto portal_asset  = assetM->get<asset::model>("portal");
-			auto box_asset     = assetM->get<asset::model>("box");
 			auto diffuse_asset = assetM->get<asset::image>("paddle");
 
 			auto win = engine->add();
@@ -88,6 +84,18 @@ namespace pong {
 
 			engine->add<component::texture>(tex_box, diffuse_asset);
 
+			// models
+
+			auto model_cabinet = engine->add();
+			auto model_monitor = engine->add();
+			auto model_portal  = engine->add();
+			auto model_box     = engine->add();
+
+			engine->add<component::model>(model_cabinet, assetM->get<asset::model>("cabinet"));
+			engine->add<component::model>(model_monitor, assetM->get<asset::model>("monitor"));
+			engine->add<component::model>(model_portal,  assetM->get<asset::model>("portal"));
+			engine->add<component::model>(model_box,     assetM->get<asset::model>("box"));
+
 			// materials
 
 			auto mat_cabinet = engine->add();
@@ -117,15 +125,15 @@ namespace pong {
 			auto camera_pong   = engine->add();
 
 			auto proj_arcade = math::perspective(math::point2(1280, 1280), 0.1, 1000);
-			engine->add<component::camera  >(camera_arcade, scene_arcade, win, proj_arcade);
-			engine->add<component::position>(camera_arcade, math::point3(0, 1.2f, 2));
-			engine->add<component::model   >(camera_arcade, cabinet_asset, scene_arcade, mat_cabinet);
+			engine->add<component::camera    >(camera_arcade, scene_arcade, win, proj_arcade);
+			engine->add<component::position  >(camera_arcade, math::point3(0, 1.2f, 2));
+			engine->add<component::renderable>(camera_arcade, scene_arcade, model_cabinet, mat_cabinet);
 
 			auto proj_cctv = math::perspective(math::point2(1280, 1280), 0.1, 1000);
 			engine->add<component::camera     >(camera_cctv, scene_arcade, fb_cctv, proj_cctv);
 			engine->add<component::position   >(camera_cctv, math::point3(1, 1.6f, 1.5f));
 			engine->add<component::orientation>(camera_cctv, math::point3(0, glm::radians(-20.0f), 0));
-			engine->add<component::model      >(camera_cctv, portal_asset, scene_arcade, mat_box);
+			engine->add<component::renderable >(camera_cctv, scene_arcade, model_portal, mat_box);
 
 			//engine->add<component::camera>(camera_pong, scene_pong, fb_pong);
 
@@ -135,18 +143,20 @@ namespace pong {
 
 			// arcade
 
-			for(size_t row = 0; row < 3; ++row) {
+			const size_t rows = 5;
+			const size_t cols = 5;
+			for(size_t row = 0; row < rows; ++row) {
 				math::decimal z = row * -4.0f;
-				for(size_t col = 0; col < 3; ++col) {
-					math::decimal x = (math::decimal(col) - 3 / 2) * 2;
+				for(size_t col = 0; col < cols; ++col) {
+					math::decimal x = (math::decimal(col) - cols / 2) * 2;
 
 					auto cabinet = engine->add();
-					engine->add<component::position>(cabinet, math::point3(x, 0, z));
-					engine->add<component::model   >(cabinet, cabinet_asset, scene_arcade, mat_cabinet);
+					engine->add<component::position  >(cabinet, math::point3(x, 0, z));
+					engine->add<component::renderable>(cabinet, scene_arcade, model_cabinet, mat_cabinet);
 
 					auto viewport_pong = engine->add();
-					engine->add<component::position>(viewport_pong, math::point3(x, 0, z));
-					engine->add<component::model   >(viewport_pong, monitor_asset, scene_arcade, mat_monitor);
+					engine->add<component::position  >(viewport_pong, math::point3(x, 0, z));
+					engine->add<component::renderable>(viewport_pong, scene_arcade, model_monitor, mat_monitor);
 
 					/*
 					if(row > 0) {
@@ -164,33 +174,33 @@ namespace pong {
 
 			/*
 			auto portal1 = engine->add();
-			engine->add<component::position>(portal1, math::point3(0, 0, -10));
-			engine->add<component::scale   >(portal1, math::point3(4, 4, 4));
-			engine->add<component::model   >(portal1, portal_asset, scene_arcade, mat_portal);
+			engine->add<component::position  >(portal1, math::point3(0, 0, -10));
+			engine->add<component::scale     >(portal1, math::point3(4, 4, 4));
+			engine->add<component::renderable>(portal1, scene_arcade, model_portal, mat_portal);
 			st.keep(portal1);
 			*/
 
 			// pong
 
 			auto ball = engine->add();
-			engine->add<component::position>(ball)->pos.derivative(0) = math::point3(-0.5, -0.1, 0);
-			engine->add<component::scale   >(ball, math::point3(0.02, 0.02, 0));
-			engine->add<component::phys    >(ball, detector::box(), responder::rigid());
-			engine->add<component::model   >(ball, box_asset, scene_pong, mat_box);
+			engine->add<component::position  >(ball)->pos.derivative(0) = math::point3(-0.5, -0.1, 0);
+			engine->add<component::scale     >(ball, math::point3(0.02, 0.02, 0));
+			engine->add<component::phys      >(ball, detector::box(), responder::rigid());
+			engine->add<component::renderable>(ball, scene_pong, model_box, mat_box);
 			st.keep(ball);
 
 			auto left_paddle = engine->add();
-			engine->add<component::position>(left_paddle, math::point3(-0.925, 0, 0));
-			engine->add<component::scale   >(left_paddle, math::point3(0.025, 0.2, 0));
-			engine->add<component::phys    >(left_paddle, detector::box(), responder::stat());
-			engine->add<component::model   >(left_paddle, box_asset, scene_pong, mat_box);
+			engine->add<component::position  >(left_paddle, math::point3(-0.925, 0, 0));
+			engine->add<component::scale     >(left_paddle, math::point3(0.025, 0.2, 0));
+			engine->add<component::phys      >(left_paddle, detector::box(), responder::stat());
+			engine->add<component::renderable>(left_paddle, scene_pong, model_box, mat_box);
 			st.keep(left_paddle);
 
 			auto right_paddle = engine->add();
-			engine->add<component::position>(right_paddle, math::point3( 0.925, 0, 0));
-			engine->add<component::scale   >(right_paddle, math::point3(0.025, 0.2, 0));
-			engine->add<component::phys    >(right_paddle, detector::box(), responder::stat());
-			engine->add<component::model   >(right_paddle, box_asset, scene_pong, mat_box);
+			engine->add<component::position  >(right_paddle, math::point3( 0.925, 0, 0));
+			engine->add<component::scale     >(right_paddle, math::point3(0.025, 0.2, 0));
+			engine->add<component::phys      >(right_paddle, detector::box(), responder::stat());
+			engine->add<component::renderable>(right_paddle, scene_pong, model_box, mat_box);
 			st.keep(right_paddle);
 
 			// actions
