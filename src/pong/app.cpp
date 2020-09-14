@@ -9,6 +9,8 @@
 #include <polar/component/stage.h>
 #include <polar/math/constants.h>
 #include <polar/math/types.h>
+#include <polar/node/perspective.h>
+#include <polar/node/window/size.h>
 #include <polar/support/action/keyboard.h>
 #include <polar/support/action/mouse.h>
 #include <polar/support/input/key.h>
@@ -98,17 +100,19 @@ namespace pong {
 
 			// materials
 
-			auto mat_cabinet = engine->add();
-			auto mat_monitor = engine->add();
-			auto mat_portal  = engine->add();
-			auto mat_box     = engine->add();
-			auto mat_chroma  = engine->add();
+			auto mat_cabinet      = engine->add();
+			auto mat_monitor_cctv = engine->add();
+			auto mat_monitor_pong = engine->add();
+			auto mat_portal       = engine->add();
+			auto mat_box          = engine->add();
+			auto mat_chroma       = engine->add();
 
-			engine->add<component::material>(mat_cabinet, stage_3d,      tex_box);
-			engine->add<component::material>(mat_monitor, stage_monitor, fb_cctv);
-			engine->add<component::material>(mat_portal,  stage_monitor, fb_cctv);
-			engine->add<component::material>(mat_box,     stage_2d,      tex_box);
-			engine->add<component::material>(mat_chroma,  stage_chroma,  fb_cctv);
+			engine->add<component::material>(mat_cabinet,      stage_3d,      tex_box);
+			engine->add<component::material>(mat_monitor_cctv, stage_monitor, fb_cctv);
+			engine->add<component::material>(mat_monitor_pong, stage_monitor, fb_pong);
+			engine->add<component::material>(mat_portal,       stage_monitor, fb_cctv);
+			engine->add<component::material>(mat_box,          stage_2d,      tex_box);
+			engine->add<component::material>(mat_chroma,       stage_chroma,  fb_cctv);
 
 			// scenes
 
@@ -124,18 +128,18 @@ namespace pong {
 			auto camera_cctv   = engine->add();
 			auto camera_pong   = engine->add();
 
-			auto proj_arcade = math::perspective(math::point2(1280, 1280), 0.1, 1000);
+			auto proj_arcade = node::perspective(node::window::size(win));
 			engine->add<component::camera    >(camera_arcade, scene_arcade, win, proj_arcade);
 			engine->add<component::position  >(camera_arcade, math::point3(0, 1.2f, 2));
 			engine->add<component::renderable>(camera_arcade, scene_arcade, model_cabinet, mat_cabinet);
 
-			auto proj_cctv = math::perspective(math::point2(1280, 1280), 0.1, 1000);
+			auto proj_cctv = node::perspective(math::point2(1024, 768));
 			engine->add<component::camera     >(camera_cctv, scene_arcade, fb_cctv, proj_cctv);
 			engine->add<component::position   >(camera_cctv, math::point3(1, 1.6f, 1.5f));
 			engine->add<component::orientation>(camera_cctv, math::point3(0, glm::radians(-20.0f), 0));
 			engine->add<component::renderable >(camera_cctv, scene_arcade, model_portal, mat_box);
 
-			//engine->add<component::camera>(camera_pong, scene_pong, fb_pong);
+			engine->add<component::camera>(camera_pong, scene_pong, fb_pong);
 
 			st.keep(camera_arcade);
 			st.keep(camera_cctv);
@@ -143,8 +147,8 @@ namespace pong {
 
 			// arcade
 
-			const size_t rows = 5;
-			const size_t cols = 5;
+			const size_t rows = 10;
+			const size_t cols = 10;
 			for(size_t row = 0; row < rows; ++row) {
 				math::decimal z = row * -4.0f;
 				for(size_t col = 0; col < cols; ++col) {
@@ -156,7 +160,12 @@ namespace pong {
 
 					auto viewport_pong = engine->add();
 					engine->add<component::position  >(viewport_pong, math::point3(x, 0, z));
-					engine->add<component::renderable>(viewport_pong, scene_arcade, model_monitor, mat_monitor);
+
+					if(row == 0 && col == cols / 2) {
+						engine->add<component::renderable>(viewport_pong, scene_arcade, model_monitor, mat_monitor_cctv);
+					} else {
+						engine->add<component::renderable>(viewport_pong, scene_arcade, model_monitor, mat_monitor_pong);
+					}
 
 					/*
 					if(row > 0) {
@@ -238,7 +247,6 @@ namespace pong {
 			st.keep(action->bind<kb::key<key::S>,      a_left_paddle >(lifetime::when, -1));
 			st.keep(action->bind<kb::key<key::Up>,     a_right_paddle>(lifetime::when,  1));
 			st.keep(action->bind<kb::key<key::Down>,   a_right_paddle>(lifetime::when, -1));
-			//st.keep(action->bind<mouse::motion_y, a_left_paddle>());
 			*/
 
 			// arcade actions
